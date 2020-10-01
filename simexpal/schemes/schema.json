@@ -98,7 +98,15 @@
 							{"$ref": "#/definitions/str_list"}
 						]
 					},
-					"set": {"$ref": "#/definitions/str_or_str_list"}
+					"set": {"$ref": "#/definitions/str_or_str_list"},
+					"gitrepo": {
+						"type": "object",
+						"required": ["url"],
+						"properties": {
+							"commit_hash": {"type": "string"},
+							"filename": {"type": "string"}
+						}
+					}
 				},
 				"additionalProperties": false,
 				"if": {
@@ -202,7 +210,8 @@
 						"type": "integer",
 						"minimum": 0
 					},
-					"slurm_args": {"$ref": "#/definitions/str_or_str_list"}
+					"slurm_args": {"$ref": "#/definitions/str_or_str_list"},
+					"workdir": {"type": "string"}
 				},
 				"additionalProperties": false
 			}

@@ -4,8 +4,10 @@ import os
 import requests
 import tarfile
 import zipfile
+import subprocess
 
 from .util import try_mkdir
+from .util import try_rmtree
 
 class DownloadException(Exception):
 	pass
@@ -24,6 +26,33 @@ repos = {
 		'file_fmt': '.zip'
 	}
 }
+
+def download_instance_git(inst_yml, instances_dir, filename, partial_path, ext):
+	url = inst_yml['gitrepo']['url']
+
+	assert 'url' in inst_yml['gitrepo']
+	commit_hash = inst_yml['gitrepo']['commit_hash']
+
+	git_filename = filename
+	if 'filename' in inst_yml['gitrepo']:
+		git_filename = inst_yml['gitrepo']['filename']
+
+	try_mkdir(instances_dir)
+
+	tmp_git_dir = os.path.join(instances_dir, filename + 'TmpRepo') 
+
+
+	subprocess.check_call(['git', 'clone', url, tmp_git_dir])
+
+	subprocess.check_call(['git', '-C', tmp_git_dir, 'restore', 
+								'--source=' + commit_hash,
+								'--worktree', git_filename])
+
+	tmp_path = os.path.join(instances_dir, filename + '.tmp')
+	subprocess.check_call(['mv', os.path.join(tmp_git_dir, git_filename), tmp_path])
+
+	try_rmtree(tmp_git_dir)
+	os.rename(tmp_path, partial_path + ext)
 
 def download_instance(inst_yml, instances_dir, filename, partial_path, ext):
 	repo = inst_yml['repo']
